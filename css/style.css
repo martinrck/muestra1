@@ -1,0 +1,935 @@
+:root {
+  --color-azul-oscuro: #000000; /* color del texto */
+  --color-verde-azulado: #eb0b0b;/* color del fondo de los menus y scroll */
+  --color-mostaza: #bbb7b7;
+  --color-naranja: #9e9d9d;/* color del paginador*/
+  --color-rojo-anaranjado: #ff0000;
+  --color-texto-claro: #ffffff;
+  --color-fondo-claro: #ffffff;/* color del fondo*/
+}
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  background: var(--color-fondo-claro);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow: hidden;
+  color: var(--color-azul-oscuro);
+}
+
+#catalogo {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  background: var(--color-fondo-claro);
+  color: var(--color-azul-oscuro);
+}
+
+#pageContainer {
+  flex: 1;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  
+}
+#pageControls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex: 1; /* para ocupar el espacio central */
+  margin-left: 10%;
+}
+#pageCounter {
+  background-color: var(--color-mostaza);
+  color: var(--color-azul-oscuro);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 1rem;
+  min-width: 48px;
+  text-align: center;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+#navControls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  background: #ddd;
+  gap: 1rem;
+  height: 50px; /* o el valor que prefieras */
+  flex-shrink: 0;
+}
+
+#mainViewer {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--color-fondo-claro);
+}
+#zoomWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  transform-origin: top left;
+  transition: transform 0.3s ease;
+}
+
+#toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--color-naranja);
+  padding: 10px 20px;
+  height: 50px;
+  flex-shrink: 0;
+  gap: 10px;
+  box-sizing: border-box;
+  color: var(--color-texto-claro);
+  
+}
+#toolbar button {
+  background-color: var(--color-naranja);
+  color: var(--color-fondo-claro);
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  border: solid 1px black;
+}
+#toolbar button:hover {
+  background-color: var(--color-rojo-anaranjado);
+}
+#rightControls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  
+}
+
+#rightControls button,
+#rightControls select {
+  background-color: var(--color-naranja);
+  color: var(--color-fondo-claro);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  border: solid 1px black;
+}
+
+#rightControls button:hover,
+#rightControls select:hover {
+  background-color: var(--color-rojo-anaranjado);
+}
+#thumbnailContainer {
+  position: absolute;
+  bottom: 50px; /* lo pones arriba del toolbar (ajustar según altura toolbar) */
+  left: 0;
+  right: 0;
+  height: 150px; /* o lo que quieras */
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #ccc;
+  overflow-x: auto;
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  z-index: 1000; 
+  overflow-y: hidden;
+}
+
+#thumbnailContainer img {
+  height: 180px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.3s;
+}
+
+#thumbnailContainer img:hover {
+  border: solid 5px var(--color-azul-oscuro);;
+}
+
+#thumbnailContainer img.active {
+  border: solid 5px var(--color-rojo-anaranjado);
+}
+
+.hidden {
+  display: none !important;
+}
+.tab-content-container,
+.scrollable-content {
+  scrollbar-color: var(--color-verde-azulado) var(--color-fondo-claro);
+  scrollbar-width: thin;
+}
+
+.tab-content-container::-webkit-scrollbar,
+.scrollable-content::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.tab-content-container::-webkit-scrollbar-thumb,
+.scrollable-content::-webkit-scrollbar-thumb {
+  background-color: var(--color-verde-azulado);
+  border-radius: 4px;
+}
+
+.tab-content-container::-webkit-scrollbar-track,
+.scrollable-content::-webkit-scrollbar-track {
+  background-color: var(--color-fondo-claro);
+}
+.brand-logo{
+  position: absolute;
+  top: 20px;
+  left: 50px; /* o right: 50px si lo querés en la esquina derecha */
+  z-index: 999;
+  width: 80px;
+  height: auto;
+}
+
+.brand-logo img {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.2));
+}
+/* Página 1: portada */
+.page-style-1 {
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  margin: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-bg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  color: white;
+  text-align: center;
+  top: 30%;
+  transform: translateY(-20%);
+  width: 100%;
+  padding: 0 2rem;
+  animation: slideInFromLeft 1.5s ease-out 0.3s forwards;
+}
+
+.hero-content h1 {
+  font-size: 5rem;
+  margin: 0;
+}
+
+.hero-content p {
+  font-size: 1.5rem;
+}
+
+@keyframes slideInFromLeft {
+  0% {
+    transform: translateX(-100%) translateY(-20%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0) translateY(-20%);
+    opacity: 1;
+  }
+}
+
+/* Página 2: contenido + tabs */
+.page-style-2 {
+  width: 100%;
+  height: calc(100vh - 50px); 
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-fondo-claro);
+  overflow: hidden;
+}
+
+/* Título */
+.section-title {
+  text-align: center;
+  font-size: 2.2rem;
+  margin-bottom: 0.75rem;
+  color: var(--color-azul-oscuro);
+  font-weight: bold;
+  margin-top: -1rem;
+  
+}
+
+.image-banner {
+  position: relative;                 
+  width: 100vw;                       
+  overflow: hidden;                 
+}
+
+/* Imagen destacada */
+.image-banner img {
+  display: block;                      
+  width: 100%;                       
+  height: auto;                        
+  object-fit: cover;     
+  max-height: 400px;           
+}
+
+
+/* Tabs */
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 1rem;
+  
+}
+
+.tab {
+  padding: 6px 14px;
+  border: none;
+  background-color: var(--color-mostaza);
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  color: var(--color-azul-oscuro);
+  font-weight: 600;
+  
+}
+
+.tab:hover {
+  background-color: var(--color-naranja);
+  color: var(--color-texto-claro);
+}
+
+.tab.active {
+  background-color: var(--color-verde-azulado);
+  color: var(--color-texto-claro);
+}
+
+/* Contenedor del contenido de tabs */
+.tab-content-container {
+  flex: 1;
+  overflow-y: auto;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+/* Contenido de cada tab */
+.tab-content {
+  display: none;
+  text-align: center;
+  font-size: 1.2rem;
+  color: var(--color-azul-oscuro);
+  animation: fadeIn 0.8s ease forwards;
+  max-width: 1500px;
+  margin: -2rem auto;
+  padding: 1rem;
+  font-size: 1rem;
+}
+
+/* Cuando está activo lo mostramos */
+.tab-content.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* Página 3 */
+.page-style-3 {
+  height: calc(100vh - 50px); /* Dejamos espacio para el paginador */
+  overflow: hidden;
+  background-color: var(--color-fondo-claro);
+}
+
+.page-style-3 .page3-layout {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+}
+
+.page-style-3 .left-side {
+  flex: 1;
+  overflow: hidden;
+  height: auto;
+}
+
+.page-style-3 .left-side img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.page-style-3 .right-side {
+  flex: 1;
+  display: flex;
+  flex-direction: column;/* Centrado vertical */
+  align-items: center;     /* Centrado horizontal */
+  padding: 0px 20px;
+  color: var(--color-azul-oscuro);
+  text-align: center; /* Para centrar texto también */
+}
+
+/* Contenido de tabs */
+.tab3-content {
+  display: none;
+  animation: fadeIn 0.4s ease-in-out forwards;
+  width: 100%;
+  overflow: hidden;
+  font-size: 1rem;
+}
+
+.tab3-content h2,
+.tab3-content p,
+.tab3-content ul {
+  margin-bottom: 10px;
+  margin-top: 20px
+}
+.tab3-content:not(.hidden) {
+  display: block;
+}
+.tab3-content ul {
+  transform: translateX(-30px);
+  text-align: start;
+}
+/* Animaciones para listas */
+.tab3-content ul li {
+  opacity: 0;
+  animation-name: slideInFromRight;
+  animation-duration: 0.4s;
+  animation-fill-mode: forwards;
+  animation-timing-function: ease-out;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  padding: 5px;
+  list-style: none;
+}
+
+.tab3-content ul li:hover {
+  color: var(--color-rojo-anaranjado);
+}
+
+.tab3-content ul li:nth-child(1) {
+  animation-delay: 0.2s;
+}
+.tab3-content ul li:nth-child(2) {
+  animation-delay: 0.4s;
+}
+.tab3-content ul li:nth-child(3) {
+  animation-delay: 0.6s;
+}
+.tab3-content ul li:nth-child(4) {
+  animation-delay: 0.8s;
+}
+.tab3-content ul li:nth-child(5) {
+  animation-delay: 1s;
+}
+
+.tab3-content ul li:nth-child(6) {
+  animation-delay: 1.2s;
+}
+.tab3-content ul li:nth-child(7) {
+  animation-delay: 1.4s;
+}
+.tab3-content ul li:nth-child(8) {
+  animation-delay: 1.6s;
+}
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+/* Página 3 */
+/* Página 4: imagen y tabs locales */
+.page-style-4 {
+  height: calc(100vh - 50px); /* Dejamos espacio para el paginador */
+  overflow: hidden;
+  background-color: var(--color-fondo-claro);
+}
+
+.page-style-4 .page4-layout {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+}
+
+.page-style-4 .left-side {
+  flex: 1;
+  overflow: hidden;
+  height: auto;
+}
+
+.page-style-4 .left-side img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.page-style-4 .right-side {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  padding: 0px 20px 10px 20px;
+  color: var(--color-azul-oscuro);
+}
+
+/* Menú tabs: renombrado */
+#page4Menu {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding-top: 0.5rem;
+  flex-shrink: 0;
+  background-color: var(--color-fondo-claro);
+}
+
+#page4Menu .tab {
+  padding: 8px 16px;
+  border: none;
+  background-color: var(--color-mostaza);
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  color: var(--color-azul-oscuro);
+  font-weight: 500;
+  
+}
+
+#page4Menu .tab:hover {
+  background-color: var(--color-naranja);
+  color: var(--color-fondo-claro);
+}
+
+#page4Menu .tab.active {
+  background-color: var(--color-verde-azulado);
+  color: var(--color-fondo-claro);
+}
+.page4-producto {
+  margin-bottom: 1rem;
+}
+
+.page4-producto h3.page-title {
+  font-size: 2rem; /* más grande */
+  color: #dd1515;
+  margin-bottom: 5px; /* menos espacio abajo */
+  line-height: 1;
+}
+
+.page4-producto h4.page4-description {
+  font-size: 1.2rem;
+  margin-bottom: 0.2rem;
+  line-height: 1.3;
+}
+
+.page4-producto p {
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: 0;
+}
+
+/* Contenido de tabs */
+.tab4-content {
+  display: none;
+  animation: fadeIn 0.4s ease-in-out forwards;
+  flex: 1;
+  overflow: hidden;
+  overflow-y: auto;
+  font-size: 10px;
+}
+
+
+
+
+.tab4-content h2 {
+  margin-top: 0;
+  color: var(--color-azul-oscuro);
+}
+
+.tab4-content p {
+  color: var(--color-azul-oscuro);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.tab4-content:not(.hidden) {
+  display: block;
+}
+
+/* Animaciones para listas */
+.tab4-content ul li {
+  opacity: 0;
+  animation-name: slideInFromRight;
+  animation-duration: 0.4s;
+  animation-fill-mode: forwards;
+  animation-timing-function: ease-out;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  font-size: 15px;
+}
+
+.tab4-content ul li:hover {
+  color: var(--color-rojo-anaranjado);
+}
+
+.tab4-content ul li:nth-child(1) {
+  animation-delay: 0.2s;
+}
+.tab4-content ul li:nth-child(2) {
+  animation-delay: 0.4s;
+}
+.tab4-content ul li:nth-child(3) {
+  animation-delay: 0.6s;
+}
+.tab4-content ul li:nth-child(4) {
+  animation-delay: 0.8s;
+}
+.tab4-content ul li:nth-child(5) {
+  animation-delay: 1s;
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+
+/* Página 5: fondo claro con imagen */
+.page-style-5 {
+  height: calc(100vh - 50px); 
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #ffffff;
+}
+
+.page5-top img {
+  max-height: 35vh;
+  width: 100%;
+  object-fit: cover;
+  display: block;
+  border-bottom: 3px solid #2A9D8F;
+}
+
+.page5-top {
+  flex: 0 0 auto;
+}
+
+.page5-bottom {
+  flex: 1 1 auto;
+  display: flex;
+  overflow: hidden;
+}
+
+.text-left,
+.text-right {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background-color: #fefefe;
+}
+
+.fixed-title {
+  position: sticky;
+  top: 0;
+  background-color: var(--color-azul-oscuro);
+  color: #ffffff;
+  z-index: 2;
+  padding: 10px 15px;
+  border-bottom: 2px solid #E9C46A;
+}
+
+.fixed-title h2 {
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.scrollable-content {
+  overflow-y: auto;
+  padding: 15px;
+  height: 100%;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #264653;
+}
+.toggle-btn{
+  display: none;
+}
+/* Página 4,: fondo claro con imagen */
+/* Página 5: estilo retro */
+/* Página 5: estilo retro */
+/* Página 6: estilo retro */
+/* Página 6: estilo retro */
+/* Página 7: estilo retro */
+/* Página 7: estilo retro */
+/* Página 10: estilo retro */
+/* Utilidades */
+.hidden {
+  display: none;
+}
+
+.visible {
+  display: block;
+  margin-top: 1rem;
+}
+
+.fade-in-simple {
+  animation: fadeInSimple 0.8s ease-in ;
+}
+@keyframes fadeInSimple {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* Mobile */
+@media (max-width: 768px) {
+  .brand-logo img {
+    display: none;
+  }
+  .page-style-1 {
+    width: 100%;
+    height: calc(100vh - 50px); ;
+    overflow-x: hidden; 
+  }
+
+  .hero-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+    top: auto;
+    transform: none;
+    padding: 0 1rem;
+    text-align: center;
+  }
+
+  .hero-content h1 {
+    font-size: 3rem;
+  }
+
+  .hero-content p {
+    font-size: 2.2rem;
+  }
+  /* Pagina 2 */
+   .page-style-2 {
+    height: calc(100vh - 50px); 
+    padding: 1rem;
+  }
+
+  .image-banner img {
+    height: 200px; 
+    border-radius: 10px;
+  }
+
+  .tabs {
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .tab {
+    flex: 1 1 calc(50% - 10px);
+    font-size: 0.9rem;
+    padding: 8px 0;
+  }
+
+  .tab-content-container {
+    margin: 10px; 
+    max-height: 450px;
+    overflow-y: auto;
+  }
+
+  .tab-content {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+  }
+  /* Pagina 3 */
+  .page-style-3 .page3-layout {
+    flex-direction: column; 
+    height: 100vh;         
+  }
+  
+  .page-style-3 .left-side {
+    height: 280px; 
+  }
+
+  .page-style-3 .right-side {
+    flex: none;
+    height: calc(100vh - 180px); 
+    overflow-y: auto;           
+    padding: 15px 10px;
+   
+  }
+
+    /* Pagina 4 */
+    .page-style-4 .page4-layout {
+      flex-direction: column;
+      height: calc(100vh - 50px); 
+    }
+  
+    .page-style-4 .left-side {
+      height: 280px;
+      flex: none; /* para que no crezca */
+    }
+  
+    .page-style-4 .right-side {
+      flex: 1; 
+      height: auto; 
+      overflow-y: auto;
+      padding: 15px 10px;
+      display: flex;
+      flex-direction: column;
+    }
+  
+    
+    #page4Menu {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 10px;
+      flex-shrink: 0;
+    }
+     /* Pagina 4 */
+.page5-bottom {
+    height: calc(100vh - 35vh); 
+    display: flex;
+    flex-direction: column;
+  }
+
+  .text-left,
+  .text-right {
+    width: 100%;
+    height: 100%;
+    display: none;
+    flex-direction: column;
+  }
+  .text-left.active,
+  .text-right.active {
+    display: flex;
+  }
+
+   .fixed-title {
+    position: relative;       
+    display: flex;
+    align-items: center;
+    justify-content: space-between; 
+  }
+  .scrollable-content {
+    flex: 1 1 auto;      
+    overflow-y: auto;    
+  }
+  .toggle-btn {
+    position: absolute;      
+    right: 10px;              
+    top: 50%;                 
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 4px;   
+    display: flex;  
+  }
+   /* Toolbar */
+   #toolbar {
+    padding: 8px;
+    height: auto;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+  }
+ 
+  #toolbar button {
+    padding: 6px 10px;
+    font-size: 0.9rem;
+    white-space: nowrap;     
+    flex-shrink: 0;           
+  }
+
+  #rightControls {
+    display: flex;
+    gap: 7px;
+    align-items: center;
+  }
+
+  #toolbar button i {
+    font-size: 1.2rem;
+  }
+   #pageControls {
+    gap: 6px;               /* menos espacio entre elementos */
+    align-items: center;
+  }
+  #pageCounter {
+    font-size: 0.9rem;      /* un poco más chico */
+    padding: 3px 8px;
+  }
+}
+
+@media(max-width :1366px) {
+  .page-style-2 {
+    height: calc(100vh - 50px); 
+    padding: 1rem;
+  }
+
+  .image-banner img {
+    height: 200px; 
+    border-radius: 10px;
+  }
+
+}
